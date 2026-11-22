@@ -507,10 +507,8 @@ Repository admins; closed, Repository admins only; one direction.
 - **R-25** (fitness) `GOVERNANCE.md` states the ratchet so that a code owner can tell which position holds and what
   closes it.
 
-**Open decisions.**
-
-- Where the refactor that takes version bumps out of the governed set is built: in this pull request, or as a package
-  of its own before the ratchet closes *(raised by Amendment 6)*.
+**Open decisions.** None. The one raised here (where the refactor that takes version bumps out of the governed set is
+built) was decided "In #16, before it merges" and is Amendment 7.
 
 **Agent's defaults.**
 
@@ -522,3 +520,81 @@ Repository admins; closed, Repository admins only; one direction.
   friction".
 - "Stable governance structure" is left as his words; the document names no test for it, and closing is a governed
   change like any other.
+
+### Amendment 7 (2026-11-22): the action pins outside the governed workflows
+
+His words, verbatim (`WP82-decisions.md`, "Amendment 6" and "Amendment 7"): "we should also factor the code in such
+away that version bumps are not inside the governed set. that makes the changes far too frequent"; asked where it is
+built, "In #16, before it merges"; asked which mechanism, "B: composite actions". The research spike's findings are
+in the decisions file.
+
+**Purpose.** A governed file changes seldom and with friction. Today each Dependabot update of an action rewrites a
+governed workflow, and `version-kind` refuses a patch release that changes one, so an action bump forces a minor
+release.
+
+**Goal added.** **G10** An update of an action's version changes no governed file, for every action that can be
+wrapped; the ones that cannot are named with their reasons.
+
+**Non-goals added.** Closing the ratchet; the governed set's nine paths; what any workflow does (its triggers,
+permissions, jobs, environments and the versions it runs are unchanged, with the one exception of D-33); the `uv`
+version literal in `release.yml`; workflow dependency lockfiles and the `$/` reference; the `uv` ecosystem.
+
+**Deliverables added.**
+
+- **D-31** The wrappers: `.github/actions/<owner>/<action>/action.yml` for `astral-sh/setup-uv`, `actions/cache`,
+  `actions/cache/restore`, `actions/cache/save`, `actions/upload-artifact`, `actions/download-artifact`,
+  `actions/setup-node` and `actions/upload-pages-artifact`. Each is a composite action of one step, the action at the
+  commit the workflows carried, with its `# v` comment; its inputs are the ones this repository's workflows set,
+  passed through under their own names; `actions/cache/restore` re-exports `cache-hit`.
+- **D-32** The workflows call `./.github/actions/<owner>/<action>` in place of each wrapped action (51 calls in nine
+  files). `actions/checkout`, `pypa/gh-action-pypi-publish` and `actions/deploy-pages` stay pinned in the workflows.
+- **D-33** `release.yml`, `publish-testpypi`: a checkout step and `contents: read`, since the job calls a wrapped
+  action (`actions/download-artifact`) and a local action exists only after a checkout. `release.yml`, the `pins`
+  step: `uv run --locked` in place of `--no-project`, since the check now reads YAML.
+- **D-34** The check: `scripts/release_checks.py pins` refuses a third-party action called directly in a workflow
+  unless it is one of the three; a local action called before the job's checkout; a wrapper that is missing, called
+  by no workflow, or more than a pin (more than one step, a step key beyond `id`, `uses` and `with`, a different
+  action than its directory names, a value that is not the input or output of the same name, no full commit, no
+  `# v` comment). `.github/dependabot.yml` names each wrapper's directory and a test holds the list to the wrappers
+  present.
+- **D-35** The documents and the record: `GOVERNANCE.md` ("The secondary rules": where the pins live and which three
+  stay governed), `docs/code-owners.md` ("Pinned actions", "Dependency updates"), the changelog, the index row,
+  `WP82-decisions.md` ("Amendment 7"), issue #12 and the description of pull request #16.
+
+**Requirements added.**
+
+- **R-26** (conformance) `uv run python scripts/release_checks.py pins` passes on the tree, and
+  `tests/test_release_checks.py` covers each refusal of D-34.
+- **R-27** (conformance) The Tests workflow passes on the pull request's head (lint and the fast shard, which run
+  `setup-uv` and the three cache actions through their wrappers) and, dispatched on the branch, on the full matrix
+  (Linux fast, slow and docs; Windows).
+- **R-28** (conformance) A dry run of the Release workflow on the branch (admissibility, the build, the site) passes:
+  it runs `upload-artifact`, `download-artifact` and `upload-pages-artifact` through their wrappers.
+- **R-29** (fitness) After the merge, the first Dependabot pull request for an action moves the commit and its `# v`
+  comment in a wrapper and touches no file under `.github/workflows/`; read by the code owner who merges it.
+
+**Not exercised before the merge, by construction.** The publish to PyPI and the Pages deploy run on a push to `main`
+only, and their two actions are not wrapped; `publish-testpypi` runs on a dispatch from `dev`; the `paper` workflow
+runs on `paper`; the issue workflows run from the default branch, so they read the wrappers once a release reaches
+`main`.
+
+**Agent's defaults.**
+
+- A wrapper's directory mirrors the action's name (`.github/actions/astral-sh/setup-uv`), so the governed workflow
+  names the action it calls and the check needs no table of names.
+- Three actions stay pinned in the governed workflows: `actions/checkout` (a local action exists only after it),
+  `pypa/gh-action-pypi-publish` (its README states that a call from a composite action is unsupported),
+  `actions/deploy-pages` (its job checks nothing out and holds no `contents` permission; wrapping it would widen the
+  deploy job). A bump of one of the three is a governed change and a minor release, as before.
+- The list of the three is a constant of `scripts/release_checks.py` (`DIRECT_ACTIONS`); a workflow that calls a
+  fourth directly is itself a governed change, so the list is not declared a second time in `.github/governance.toml`.
+- The wrappers are not governed files. What holds them is the `pins` check (the fast shard on every pull request into
+  `dev`, the release's admissibility job) and the review into `main`: detection on `dev`, refusal at the release.
+- A wrapper passes only the inputs the workflows set today; a workflow that needs another input adds it to the
+  wrapper, which the check then requires to be passed through.
+- Dependabot's directories are listed one by one, not by a glob: the maintainers' stated route, and the test fails
+  when a wrapper is added without its line.
+- A commit of a fork is reachable through the parent repository's name, so a wrapper's commit can name code that is
+  not the action's. This held for a pin in a workflow too; what changes is who can move it while the ratchet is closed
+  (anyone who can push to `dev`, where before only an admin). The `pins` check does not test where a commit comes
+  from.

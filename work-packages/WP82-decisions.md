@@ -411,3 +411,54 @@ among them (a paper approver, not a code owner), and the ruleset refuses a colla
 **Not decided here.** Where the refactor that takes version bumps out of the governed set is built (this pull
 request or a package of its own), and the second point of the comment (independent review of substantive changes into
 `dev`), which Amendment 5 answers for now by holding the independent review at the release.
+
+## Amendment 7: the action pins outside the governed workflows (2026-11-22)
+
+Asked where the refactor of Amendment 6 is built ("You said version bumps should be factored out of the governed set
+(today the action pins live in `.github/workflows/*.yml`, a governed path). The ratchet is now open, so bumps are not
+blocked. Where is that refactor built?"), with the options "In #16, before it merges", "Own issue, before 0.2" and
+"Own issue, after 0.2", his answer, verbatim:
+
+> In #16, before it merges
+
+Asked which mechanism, with two designs laid out (A, the workflows leave the governed set and a governed record of
+their pin-masked hashes takes their place, a check holding the workflows to it: detection on `dev`, refusal at the
+release; B, the pins move into local composite actions and the workflows stay under the path restriction, the checkout
+pin staying in them) and the options "A: masked hash record", "B: composite actions" and "A, plus required check on
+dev", his answer, verbatim:
+
+> B: composite actions
+
+His word for the evening, verbatim:
+
+> okay, the goal state i want for tonight is both the ammended scope for the governance update and a PR covering the
+> changes per this design with Rohan tagged for a review request and comment in response to his comment pointing to
+> the PR and the ammended scope the PR addresses. Can you plan for and hit that objective autonomously?
+
+and, while the work ran:
+
+> you can use the existing PR just comment on it to address the changes in scope
+
+**The research spike** (2026-11-22, the driver's, read-only; sources by URL, none run on a runner):
+
+- `pypa/gh-action-pypi-publish` is not wrapped. Its README ("Non-goals"): "Invoking `pypi-publish` from composite
+  actions is unsupported. It is not tested. GitHub Runners have limitations and bugs in this case."
+  (https://github.com/pypa/gh-action-pypi-publish#non-goals; the breakage is its issue #299).
+- A composite action runs the pre and post steps of the actions it calls (the runner's ADR 1144,
+  https://github.com/actions/runner/blob/main/docs/adrs/1144-composite-actions.md), so a wrapped cache or `setup-uv`
+  still saves at the end of the job; a step's outputs are re-exported by `outputs.<name>.value`.
+- An input passed as an empty string does not fall back to the called action's default (actions/runner#924,
+  https://github.com/actions/runner/issues/924). The wrappers therefore pass only the inputs this repository's
+  workflows set, each either required or empty by default upstream as well.
+- Dependabot reads a composite action only in a directory named to it: `directory: /` covers `.github/workflows` and a
+  root `action.yml` (https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference;
+  dependabot-core#6704). Whether it moves the commit and its `# v` comment together in such a file is inferred from
+  its updater, not stated in its documents.
+- Reported by the spike and not built on: a same-repository reference `$/path` that needs no checkout, and workflow
+  dependency lockfiles (`.github/workflows/actions.lock`). The driver has not verified either.
+
+**Applied as.** Amendment 7 of `WP82-scope-of-work.md` (goal G10, deliverables D-31 to D-35, requirements R-26 to R-29,
+the Agent's defaults). Eight actions are called through wrappers under `.github/actions/<owner>/<action>/`; three
+stay pinned in the workflows (`actions/checkout`, `pypa/gh-action-pypi-publish`, `actions/deploy-pages`), each for a
+stated reason. The design decisions inside his choice of mechanism were the driver's, on his word for the evening,
+and are listed as the Agent's defaults of the amendment for his approval as one item.
