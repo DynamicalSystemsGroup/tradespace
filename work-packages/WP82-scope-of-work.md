@@ -425,3 +425,50 @@ and none is red because its declaration is ahead of the live settings.
 - `talk/*` is a fourth class of remote branch beside the open pull request's head, the `qc/*` dry run and the bot's
   branch, on his word "Pushed, rule widened" (D-22).
 - The merge-time required checks of `dev`'s own ruleset are unchanged; this amendment edits no setting.
+
+### Amendment 5 (2026-11-22): a code owner merges their own pull request into dev
+
+His words, verbatim (`WP82-decisions.md`, "Amendment 5"): "i am not super worried (yet) about codeowners merging their
+own code. i think its okay as long as they cannot tamper. [...] the friction was so high tha work ground to a halt. i
+still want a hard review gate on releases but i don't think we should have extra friction for merging into Dev."; asked
+where the change lands, "Amendment 5 on #16". The amendment supersedes the merge rule this scope inherited from WP78
+(into `dev`, merged by a code owner who is not the author) and the sentence of this document's opening that names
+`danlessa` as the one who reviews and merges this pull request: a code owner merges it, an admin since it changes
+governed files.
+
+**Goal added.** **G8** A pull request into `dev` is merged by a code owner, who may be its author; the review by a
+second code owner is held at the release, into `main`.
+
+**Non-goals added.** The paper's merge rule; the `main` rulesets; any live setting.
+
+**Deliverables added.**
+
+- **D-25** The rule in prose: `GOVERNANCE.md` ("The two reviews"), `.github/PR_ADMISSIBILITY.md` (the merge row),
+  `CONTRIBUTING.md`, `docs/code-owners.md` and `AGENTS.md` say that the code owner who merges into `dev` may be the
+  author, and name the two things that do not rest on that merge: the push control on the governed files and the
+  review into `main`.
+- **D-26** The merge check: `scripts/admissibility.py merge` passes a merge into `dev` by any code owner and fails
+  one by anyone else; the single-code-owner notice and `merge_row` are removed; the workflow
+  `.github/workflows/merge-by-code-owner.yml` says so in its comment and job name.
+- **D-27** The record: `WP82-decisions.md` ("Amendment 5", his words and the observation), the changelog entry, the
+  index row, issue #12 and the description of pull request #16.
+
+**Requirements added.**
+
+- **R-21** (conformance) `tests/test_admissibility.py`: a merge into `dev` by the author who is a code owner passes;
+  by the only code owner passes with no notice; by a contributor who is not a code owner fails, their own pull request
+  included; the three `paper` cases are unchanged and pass.
+- **R-22** (conformance) `.github/governance.toml` is unchanged by this amendment and `tests/test_repo_settings.py`
+  passes.
+- **R-23** (fitness) The five documents of D-25 state one rule, read side by side by the code owner who merges.
+
+**Agent's defaults.**
+
+- The fitness rows of `.github/PR_ADMISSIBILITY.md` keep their wording ("a code owner", "the reviewer"): the reviewer
+  is the code owner who merges, the author included.
+- The merge check stays as a record of who merged; it is not deleted, since a merge by someone who is not a code owner
+  is still a failure worth a comment.
+- `work-packages/milestones.md` ("The 0.2 board") keeps his release line of 2026-11-17 as written; it is a dated
+  record.
+- The observation is recorded in the decisions file with the dates of the pull requests; `GOVERNANCE.md` carries the
+  decision and its reason in one clause.

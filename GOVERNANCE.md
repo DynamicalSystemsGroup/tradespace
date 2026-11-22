@@ -21,11 +21,14 @@ contribution route is kept apart from the software's.
 
 ## The two reviews
 
-Two decisions, by two people, with two questions.
+Two decisions, with two questions; the second is always made by a second person.
 
-Into `dev`, a review of the work. A code owner who is not the pull request's author asks: does this do what its
-issue says, and is each good-enough item met (conformance by running the check, fitness by looking)? The conditions
-are `.github/PR_ADMISSIBILITY.md`; the review is recorded in the pull request, the merge under the merger's name.
+Into `dev`, a review of the work. The code owner who merges asks: does this do what its issue says, and is each
+good-enough item met (conformance by running the check, fitness by looking)? The conditions are
+`.github/PR_ADMISSIBILITY.md`; the review is recorded in the pull request, the merge under the merger's name. The
+code owner who merges may be the pull request's author (decided 2026-11-22: under the rule that a second code owner
+merges every candidate, work on `dev` stopped). Two things do not rest on that merge: a change to a governed file is
+pushed by a Repository admin ("The secondary rules"), and nothing is released without the review into `main`.
 
 Into `main`, a review of the release. A code owner who is not the pull request's author asks: is this candidate the
 release? They read the changelog entry, the release issue the pull request closes and the staged site, and merge.

@@ -64,8 +64,8 @@ conditions](.github/PR_ADMISSIBILITY.md); [the pull request template](.github/pu
 Conformance is verified by running the checks and quoting the result; a tool may run them. Fitness is validated by a
 named reviewer who looks at the thing, the page in a browser, the figure, the output of the example, and signs the
 judgement in the review. No passing check stands in for that judgement, and no judgement excuses a failing check. A
-pull request merges into `dev`, by a code owner who is not its author (a rule that cannot hold while the code owners
-are one person, and binds by design the moment there are two), when every conformance item passes, every fitness item
+pull request merges into `dev`, by a code owner, who may be its author (the review by a second code owner is the
+release's, into `main`), when every conformance item passes, every fitness item
 is validated, and no gap is left open: each gap is accepted as is with a reason, fixed before the merge,
 or made its own issue. The merge closes the issues the pull request resolves.
 

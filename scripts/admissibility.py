@@ -10,9 +10,9 @@ as a command and calls no network service; the workflows do the commenting and t
     linked-issue   a pull request names the issue it resolves or has the ``small-fix`` label
     pr-fields      a pull request's description fields are present and non-empty (into ``paper``,
                    the ``Paper`` section too)
-    merge          a pull request merged into ``dev`` was merged by a code owner, not its author;
-                   one merged into ``paper``, by a paper approver (the ``paper/`` line), not its
-                   author
+    merge          a pull request merged into ``dev`` was merged by a code owner, who may be its
+                   author; one merged into ``paper``, by a paper approver (the ``paper/`` line),
+                   not its author
 
 A dependency update, a pull request opened by ``dependabot[bot]`` against ``dev`` with the
 ``dependencies`` label, passes ``linked-issue`` and ``pr-fields`` with a notice that quotes its
@@ -227,11 +227,6 @@ def _row(root: Path, start: str) -> str:
     return f"{cells[0]} ({cells[1]}): {cells[2]}"
 
 
-def merge_row(root: Path = ROOT) -> str:
-    """The pull request admissibility row about the merge."""
-    return _row(root, "| It is merged by a code owner")
-
-
 def dependency_row(root: Path = ROOT) -> str:
     """The pull request admissibility row about a dependency update."""
     return _row(root, "| A dependency update")
@@ -242,9 +237,8 @@ def merge_problems(
 ) -> tuple[list[str], list[str]]:
     """Return (problems, notices) for a closed pull request.
 
-    Into ``dev``: merged by a code owner who is not the author (a notice while the code owners
-    are one person). Into ``paper``: merged by a paper approver who is not the author; the
-    approvers are two, so there is no notice. Any other base is not checked.
+    Into ``dev``: merged by a code owner, who may be the author. Into ``paper``: merged by a
+    paper approver who is not the author. Any other base is not checked. No case yields a notice.
     """
     pr = event["pull_request"]
     if event.get("action") != "closed" or not pr.get("merged"):
@@ -261,12 +255,8 @@ def merge_problems(
         return [], []
     if pr["base"]["ref"] != "dev":
         return [], []
-    if not (owners - {author}):
-        return [], [f"merged without a second code owner; the row says: {merge_row(root)}"]
     if merger not in owners:
         return [f"merged by @{merger or 'unknown'}, who is not a code owner"], []
-    if merger == author:
-        return ["merged by its own author, though another code owner exists"], []
     return [], []
 
 

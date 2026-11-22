@@ -76,8 +76,8 @@ files are there. Each is a script in `scripts/admissibility.py`; none runs code 
   good-enough item is marked conformance or fitness. On a gap it comments and keeps the `draft` label.
 - Removing `draft` by anyone but a code owner is reverted, with a comment.
 - A pull request must say `closes #n` or carry `small-fix`, and fill every section of its template.
-- A merge into `dev` is recorded: by a code owner who is not the author. While the code owners are one person the
-  check passes with a notice that quotes the condition; the notice stops the day a second code owner is added.
+- A merge into `dev` is recorded: by a code owner, the author or another. A merge by anyone else fails the check,
+  and the workflow comments on the pull request.
 
 ## Pinned actions
 

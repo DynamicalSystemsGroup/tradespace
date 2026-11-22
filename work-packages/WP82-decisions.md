@@ -341,3 +341,36 @@ beside it, from his screenshot of 2026-11-19 13:05: `danlessa` is now a maintain
   The runner count drops from 63 to 62 fields and the local-only count rises from 7 to 8 (70 in all);
   `tests/test_repo_settings.py` follows. The sequence of settings above is the result: two runner-checked before the
   merge, three local-only after it.
+
+## Amendment 5: a code owner merges their own pull request into dev (2026-11-22)
+
+The occasion: pull request #32 into `dev` was merged by its author, a code owner (`rororowyourboat`), and the merge
+check failed on it ("merged by its own author, though another code owner exists"). The driver reported it to him with
+the state of the three open pull requests. His words, verbatim:
+
+> i am not super worried (yet) about codeowners merging their own code. i think its okay as long as they cannot tamper.
+> though i know this is against our original plan but to be totally honest the friction was so high tha work ground to
+> a halt. i still want a hard review gate on releases but i don't think we should have extra friction for merging into
+> Dev. that observation needs to be documented and likely the rules both in the governance docs and the github config
+> need to be reconciled to it. otherwise i just want to work on getting code merged into dev so we can prep a release
+
+Put to him as: "Where should the rule change 'a code owner may merge their own pull request into dev' land, given that
+PR #16 (the 0.2 governance update, issue #12) already rewrites the same governance files and merges first?" With the
+options "Amendment 5 on #16", "New issue, PR after #16" and "Record now, change after 0.2", his answer, verbatim:
+
+> Amendment 5 on #16
+
+**The observation.** The rule of 2026-11-17 (a pull request into `dev` is merged by a code owner who is not its
+author) bound from the day there were three code owners. Between 2026-11-18 and 2026-11-22 the three pull requests of
+the 0.2 release (#15, #16, #18) stayed open with green checks and no merge; the one pull request that merged into `dev`
+in that time (#32) merged against the rule.
+
+**Applied as.** Amendment 5 of `WP82-scope-of-work.md` (goal G8, deliverables D-25 to D-27, requirements R-21 to R-23,
+the Agent's defaults). Into `dev`, the merger is a code owner and may be the author; the merge check fails only on a
+merge by someone who is not a code owner. The review by a second person is the release's: the `main-review` ruleset
+(one approval, a code owner's review, no bypass) is unchanged, and GitHub does not count an author's approval of their
+own pull request. "Cannot tamper" is read by the driver as the control this pull request already carries: the
+`governance-files` push ruleset, under which a change to a governed file is pushed by a Repository admin. The paper's
+rule (an approver who is not the author) is unchanged. No setting changes: the live `dev` ruleset (27471794) carries
+the deletion and force-push rules only and never required a review, so the declaration is unchanged and issue #24's
+sequence stands.

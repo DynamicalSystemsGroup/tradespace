@@ -176,10 +176,10 @@ def test_merge_by_another_code_owner_passes(tmp_path):
     assert run(tmp_path, "merge", ev, "*   @alice @bob\n")[0] == 0
 
 
-def test_merge_by_the_author_when_another_code_owner_exists_fails(tmp_path):
+def test_merge_by_the_author_who_is_a_code_owner_passes(tmp_path):
+    # WP82 Amendment 5 (his word, 2026-11-22): a code owner merges their own pull request into dev.
     ev = pr_event("", action="closed", merged=True, merger="alice")
-    code, report = run(tmp_path, "merge", ev, "*   @alice @bob\n")
-    assert code == 1 and "own author" in report
+    assert run(tmp_path, "merge", ev, "*   @alice @bob\n")[0] == 0
 
 
 def test_merge_by_a_stranger_fails(tmp_path):
@@ -187,11 +187,16 @@ def test_merge_by_a_stranger_fails(tmp_path):
     assert run(tmp_path, "merge", ev, "*   @alice @bob\n")[0] == 1
 
 
-def test_merge_by_the_only_code_owner_passes_with_the_row_quoted(tmp_path, capsys):
+def test_merge_by_the_only_code_owner_passes_without_a_notice(tmp_path, capsys):
     ev = pr_event("", action="closed", merged=True, merger="alice")
     assert run(tmp_path, "merge", ev, "*   @alice\n")[0] == 0
-    out = capsys.readouterr().out
-    assert out.startswith("::notice::") and "cannot hold" in out
+    assert "::notice::" not in capsys.readouterr().out
+
+
+def test_merge_of_a_contributors_pull_request_by_the_contributor_fails(tmp_path):
+    ev = pr_event("", action="closed", merged=True, author="eve", merger="eve")
+    code, report = run(tmp_path, "merge", ev, "*   @alice @bob\n")
+    assert code == 1 and "@eve, who is not a code owner" in report
 
 
 def test_merge_into_another_branch_or_unmerged_is_ignored(tmp_path):
