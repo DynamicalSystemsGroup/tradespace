@@ -335,7 +335,11 @@ def test_the_governed_files_are_the_push_rulesets_paths_and_each_has_its_codeown
     assert sorted(rule["parameters"]["restricted_file_paths"]) == sorted(
         g["path"] for g in governed
     )
-    assert crs._actors(push["bypass_actors"]) == ["RepositoryRole:5:always"]
+    # the open position of the ratchet (his word, 2026-11-22, WP82 Amendment 6)
+    assert crs._actors(push["bypass_actors"]) == [
+        "RepositoryRole:2:always",
+        "RepositoryRole:5:always",
+    ]
     adm = crs._code_owners_module()
     lines = adm.governed_owners(ROOT / ".github" / "CODEOWNERS")
     assert sorted(lines) == sorted(g["codeowners"] for g in governed)

@@ -157,14 +157,22 @@ type = "non_fast_forward"
 
 # governance-files: the control on the governed files (the secondary rules below; decided 2026-11-17,
 # WP82: CODEOWNERS lines plus a push ruleset). A push that touches one of the paths is refused unless
-# the pusher is a Repository admin, the one bypass actor, always on: a push ruleset has no
-# pull-requests-only mode and a pull request's merge is a push too. Who approves a change to a governed
-# file is its CODEOWNERS line; who pushes it is this ruleset. A push ruleset has no branch condition.
+# the pusher bypasses, always on: a push ruleset has no pull-requests-only mode and a pull request's
+# merge is a push too. Who approves a change to a governed file is its CODEOWNERS line; who pushes it
+# is this ruleset. A push ruleset has no branch condition.
+# The bypass is a ratchet (decided 2026-11-22, WP82 Amendment 6; GOVERNANCE.md, "The secondary rules").
+# Open, the position declared here: the Maintain role (RepositoryRole 2) and Repository admins
+# (RepositoryRole 5). Closed: Repository admins only, the decision of 2026-11-17. It closes once the
+# governance structure is stable and version bumps have left the governed set, by removing the first
+# actor below, and it does not reopen.
 [[rulesets]]
 name = "governance-files"
 target = "push"
 enforcement = "active"
-bypass_actors = [{ actor_type = "RepositoryRole", actor_id = 5, bypass_mode = "always" }]
+bypass_actors = [
+  { actor_type = "RepositoryRole", actor_id = 2, bypass_mode = "always" },
+  { actor_type = "RepositoryRole", actor_id = 5, bypass_mode = "always" },
+]
 # The API returns bypass actors to administrators only; the workflow token sees an empty list, so the
 # field is compared locally and listed as not checked on the runner (the first controls run, 2026-11-17).
 [rulesets.fields.bypass_actors]
@@ -228,8 +236,8 @@ can_admins_bypass = false
 # governed change. `check` is "executable" (a script or a test checks it; `by` names which) or
 # "guideline" (a named role judges it; `by` names who). `codeowners` is the file's own line in
 # .github/CODEOWNERS, whose logins approve a change to it (the three code owners; decided 2026-11-17,
-# WP82); `control` is how each is edited: approved by that line, pushed by a Repository admin, since
-# the governance-files push ruleset above refuses any other push that touches these paths.
+# WP82); `control` is how each is edited: approved by that line, pushed by a maintainer or a Repository
+# admin, since the governance-files push ruleset above refuses any other push that touches these paths.
 
 [[governed_files]]
 path = ".github/CODEOWNERS"
@@ -237,7 +245,7 @@ codeowners = "/.github/CODEOWNERS"
 rule = "who holds authority: the code owners (the * line) and the paper's approvers (the paper/ line)"
 check = "executable"
 by = "scripts/check_repo_settings.py (each code owner's and each paper approver's access); scripts/admissibility.py and tests/test_admissibility.py (the merge row, into dev and into paper)"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/governance.toml"
@@ -245,7 +253,7 @@ codeowners = "/.github/governance.toml"
 rule = "the settings that enforce the release rules"
 check = "executable"
 by = "scripts/check_repo_settings.py in the controls job; tests/test_repo_settings.py"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/workflows/*.yml"
@@ -253,7 +261,7 @@ codeowners = "/.github/workflows/"
 rule = "what runs, gates and publishes"
 check = "executable"
 by = "scripts/release_checks.py pins; tests/test_release_workflows.py, tests/test_ci_shards.py, tests/test_release_checks.py, tests/test_paper_model.py"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = "GOVERNANCE.md"
@@ -261,7 +269,7 @@ codeowners = "/GOVERNANCE.md"
 rule = "the release rules in prose, the two reviews, the secondary rules"
 check = "guideline"
 by = "a code owner, at the review of any change to it; its list of secondary rules is checked against this file by tests/test_repo_settings.py"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/ISSUE_ADMISSIBILITY.md"
@@ -269,7 +277,7 @@ codeowners = "/.github/ISSUE_ADMISSIBILITY.md"
 rule = "when a draft becomes an issue"
 check = "guideline"
 by = "a code owner who removes the draft label (the fitness rows); the machine rows run in issue-admissibility.yml and draft-label-gate.yml"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/PR_ADMISSIBILITY.md"
@@ -277,7 +285,7 @@ codeowners = "/.github/PR_ADMISSIBILITY.md"
 rule = "when a pull request is reviewed and merged into dev"
 check = "guideline"
 by = "the code owner who reviews and merges (the fitness rows); the machine rows run in pr-linked-issue.yml, pr-fields.yml, merge-by-code-owner.yml and test.yml"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/RELEASE_ADMISSIBILITY.md"
@@ -285,7 +293,7 @@ codeowners = "/.github/RELEASE_ADMISSIBILITY.md"
 rule = "when a merge into main is a release"
 check = "guideline"
 by = "the code owner who merges the release (the fitness row); the machine rows run in release.yml"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/ISSUE_TEMPLATE/*.yml"
@@ -293,7 +301,7 @@ codeowners = "/.github/ISSUE_TEMPLATE/"
 rule = "what an issue asks for"
 check = "executable"
 by = "tests/test_admissibility.py (the scope-of-work template carries the fields the checks read); the forms themselves, on GitHub"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
 
 [[governed_files]]
 path = ".github/pull_request_template.md"
@@ -301,4 +309,4 @@ codeowners = "/.github/pull_request_template.md"
 rule = "what a pull request asks for"
 check = "executable"
 by = "tests/test_admissibility.py (the template carries the sections the pr-fields check reads)"
-control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"
+control = "approved by the owners on its CODEOWNERS line (the three code owners); pushed by a maintainer or a Repository admin, directly to dev or as the merge of a pull request (the governance-files push ruleset)"

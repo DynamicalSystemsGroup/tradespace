@@ -374,3 +374,40 @@ own pull request. "Cannot tamper" is read by the driver as the control this pull
 rule (an approver who is not the author) is unchanged. No setting changes: the live `dev` ruleset (27471794) carries
 the deletion and force-push rules only and never required a review, so the declaration is unchanged and issue #24's
 sequence stands.
+
+## Amendment 6: the push ruleset's bypass as a ratchet (2026-11-22)
+
+The occasion: `rororowyourboat`'s comment on pull request #16
+(https://github.com/DynamicalSystemsGroup/tradespace/pull/16#issuecomment-7085798854): the `governance-files` push
+ruleset makes every edit of a workflow, a routine action-pin update included, wait for an admin, and he holds the
+Maintain role. His word to the driver, verbatim:
+
+> rohan just commented on this same concern. can you have a look at that. and use comments to direct him to the
+> commits where we're adjusting this
+
+The driver answered on the pull request with the commit of Amendment 5 and named two points as undecided
+(https://github.com/DynamicalSystemsGroup/tradespace/pull/16#issuecomment-7086140104). The first was put to him as:
+"Rohan objects on PR #16 that the `governance-files` push ruleset makes every governed-file edit admin-only, including
+routine action-pin bumps in `.github/workflows/*.yml`; he has maintain access, not admin. What should the ruleset do?"
+With the options "Keep as declared", "Workflows leave the ruleset", "Bypass widened to maintain" and "Drop the push
+ruleset", his answer, in his own words, verbatim:
+
+> let's declare a rachet. relax it for now so we can have the owners and maintainers bypass but once we have a stable
+> governance structure we need to restrict its editing. that said we should also factor the code in such away that
+> version bumps are not inside the governed set. that makes the changes far too frequent. the point of tightly
+> controlled governed set is that once we pass the rachet it shouldn't need to be changed, and if it does need to be
+> changed it should have friction
+
+**Applied as.** Amendment 6 of `WP82-scope-of-work.md` (goal G9, deliverables D-28 to D-30, requirements R-24 and
+R-25, the Agent's defaults). The bypass of `governance-files` is declared as a ratchet with two positions. Open, the
+position declared and the one issue #24 now sets: the Maintain role (`RepositoryRole` 2) and Repository admins
+(`RepositoryRole` 5), mode `always`. Closed: Repository admins only, the decision of 2026-11-17 ("Repository admins",
+above). It closes once the governance structure is stable, by a change to the declaration, and does not reopen.
+Version bumps leave the governed set before it closes. The roles read live on 2026-11-22 (`gh api
+repos/DynamicalSystemsGroup/tradespace/collaborators`): admin `mzargham`, `danlessa`, `nick-phl-7`, `sayertindall`,
+`furf8`; maintain `rororowyourboat`, `jshorish`. In the open position every listed collaborator bypasses, `jshorish`
+among them (a paper approver, not a code owner), and the ruleset refuses a collaborator with write access only.
+
+**Not decided here.** Where the refactor that takes version bumps out of the governed set is built (this pull
+request or a package of its own), and the second point of the comment (independent review of substantive changes into
+`dev`), which Amendment 5 answers for now by holding the independent review at the release.

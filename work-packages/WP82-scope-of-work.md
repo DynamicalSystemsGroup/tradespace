@@ -472,3 +472,53 @@ second code owner is held at the release, into `main`.
   record.
 - The observation is recorded in the decisions file with the dates of the pull requests; `GOVERNANCE.md` carries the
   decision and its reason in one clause.
+
+### Amendment 6 (2026-11-22): the push ruleset's bypass as a ratchet
+
+His words, verbatim (`WP82-decisions.md`, "Amendment 6"): "let's declare a rachet. relax it for now so we can have the
+owners and maintainers bypass but once we have a stable governance structure we need to restrict its editing. that
+said we should also factor the code in such away that version bumps are not inside the governed set. [...] the point
+of tightly controlled governed set is that once we pass the rachet it shouldn't need to be changed, and if it does
+need to be changed it should have friction". The amendment supersedes the bypass list of the "Agent's defaults"
+above (`RepositoryRole` 5 only) and Amendment 5's sentence that a governed file is pushed by a Repository admin.
+
+**Goal added.** **G9** The bypass of the `governance-files` push ruleset is a declared ratchet: open, maintainers and
+Repository admins; closed, Repository admins only; one direction.
+
+**Non-goals added.** Closing the ratchet; the paths of the governed set; the CODEOWNERS lines.
+
+**Deliverables added.**
+
+- **D-28** The declaration: `.github/governance.toml`, `governance-files`, `bypass_actors` names `RepositoryRole` 2
+  (Maintain) and `RepositoryRole` 5 (Repository admin), mode `always`, with the ratchet's two positions and its
+  closing condition in the comment; each `governed_files` entry's `control` says "a maintainer or a Repository admin".
+- **D-29** The rule in prose: `GOVERNANCE.md` ("The secondary rules") states the ratchet, its two positions, the
+  condition under which it closes, that it does not reopen, and that version bumps leave the governed set before it
+  closes; `docs/code-owners.md`, `.github/PR_ADMISSIBILITY.md` and the changelog no longer say that an admin merges a
+  change to a governed file or an action-pin update.
+- **D-30** The fixture and the record: `tests/data/wp78/rulesets__1.json` carries both actors; `WP82-decisions.md`
+  ("Amendment 6"); issue #12, issue #24 (step 2's bypass list) and the description of pull request #16.
+
+**Requirements added.**
+
+- **R-24** (conformance) `uv run python scripts/check_repo_settings.py --fixture tests/data/wp78` reads `conforming
+  (70 fields)` and `--runner` reads `conforming (62 fields on the runner; 8 local-only)`; `tests/test_repo_settings.py`
+  holds the declared bypass to the two roles.
+- **R-25** (fitness) `GOVERNANCE.md` states the ratchet so that a code owner can tell which position holds and what
+  closes it.
+
+**Open decisions.**
+
+- Where the refactor that takes version bumps out of the governed set is built: in this pull request, or as a package
+  of its own before the ratchet closes *(raised by Amendment 6)*.
+
+**Agent's defaults.**
+
+- "Owners and maintainers" is declared as the Maintain role and the Repository admin role; a role above Maintain
+  bypasses by holding it. The paper approver `jshorish` holds Maintain and so bypasses too.
+- The ratchet is declared in prose (`GOVERNANCE.md`) and in the declaration's comment; no new table or checked field
+  is added to `.github/governance.toml`, so the field counts stay 62 and 8.
+- "It does not reopen" is the driver's reading of "ratchet" and of "if it does need to be changed it should have
+  friction".
+- "Stable governance structure" is left as his words; the document names no test for it, and closing is a governed
+  change like any other.

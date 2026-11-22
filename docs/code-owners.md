@@ -34,13 +34,14 @@ are the ones the declaration does not hold.
 
 The governed files (`GOVERNANCE.md`, the secondary rules) each have their own `CODEOWNERS` line naming the three
 code owners as the approvers of a change to them, and the `governance-files` push ruleset refuses a push that
-touches one of them by anyone but a Repository admin; a pull request that changes a governed file is merged by an
-admin.
+touches one of them by anyone but a maintainer or a Repository admin, so any code owner merges a pull request that
+changes a governed file. That bypass is the open position of a ratchet; closed, it is Repository admins only
+(`GOVERNANCE.md`, "The secondary rules").
 
 For the 0.2 governance change, once the declaration is approved, any Repository admin (today `mzargham` and
 `danlessa`) applies the two runner-checked settings in one sitting before the merge: 1. `main-checks` gains the
 required check `controls`; 2. the push ruleset `governance-files` is created (active; the nine governed paths; bypass
-Repository admin, always). Issue #24 lists the steps as a checklist for that sitting. Then the governance pull request
+the Maintain role and Repository admin, always). Issue #24 lists the steps as a checklist for that sitting. Then the governance pull request
 is merged, and no other push to `dev` happens between the settings and the merge. After the merge (the first may also
 be set before it), the three local-only settings: 3. Settings, General, Pull Requests: "Automatically delete head
 branches" on; 4. `main-review` loses its bypass actor; 5. the workflow permissions become read, approving reviews
@@ -115,8 +116,8 @@ fast shard. When one arrives:
    every pull request into `dev`, so a missing run means something else (a conflict with `dev`, a closed or
    retargeted pull request): comment <code>&#64;dependabot rebase</code> and it runs on the bot's push.
 3. For a workflow-action bump: the pin is a full commit SHA with the new version in its trailing comment (`uv run
-   python scripts/release_checks.py pins` on the branch), and an admin merges it, since the push ruleset
-   `governance-files` covers `.github/workflows/*.yml`.
+   python scripts/release_checks.py pins` on the branch). The push ruleset `governance-files` covers
+   `.github/workflows/*.yml`, and a maintainer or an admin passes it.
 4. For a `uv` bump: `uv.lock` is the only file touched beyond `pyproject.toml`, and `uv lock --check` passes on the
    branch (the fast shard runs it).
 5. Merge with a merge commit. The merge check records that a code owner merged it.

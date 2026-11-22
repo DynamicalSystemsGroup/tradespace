@@ -27,8 +27,8 @@ Into `dev`, a review of the work. The code owner who merges asks: does this do w
 good-enough item met (conformance by running the check, fitness by looking)? The conditions are
 `.github/PR_ADMISSIBILITY.md`; the review is recorded in the pull request, the merge under the merger's name. The
 code owner who merges may be the pull request's author (decided 2026-11-22: under the rule that a second code owner
-merges every candidate, work on `dev` stopped). Two things do not rest on that merge: a change to a governed file is
-pushed by a Repository admin ("The secondary rules"), and nothing is released without the review into `main`.
+merges every candidate, work on `dev` stopped). Two things do not rest on that merge: nothing is released without the review into `main`, and the governed files
+are under the `governance-files` push ruleset, whose bypass is a ratchet ("The secondary rules").
 
 Into `main`, a review of the release. A code owner who is not the pull request's author asks: is this candidate the
 release? They read the changelog entry, the release issue the pull request closes and the staged site, and merge.
@@ -77,10 +77,17 @@ script or a test checks it) or a guideline (a named role judges it):
 - `.github/pull_request_template.md` — executable: `tests/test_admissibility.py` checks that it carries the sections the pull request check reads.
 
 Each is changed by a pull request into `dev` or a direct commit to `dev`, approved by the owners on its own
-`.github/CODEOWNERS` line (the three code owners) and pushed by a Repository admin: the `governance-files` push
-ruleset refuses a push that touches one of these paths by anyone else, a pull request's merge included, so a
-candidate that changes a governed file is merged by an admin (decided 2026-11-17). The declaration's `codeowners`
-and `control` fields record both.
+`.github/CODEOWNERS` line (the three code owners) and pushed by a maintainer or a Repository admin: the
+`governance-files` push ruleset refuses a push that touches one of these paths by anyone else, a pull request's
+merge included. The declaration's `codeowners` and `control` fields record both.
+
+The ruleset's bypass is a ratchet with two positions (decided 2026-11-22). Open, its position today: the Maintain
+role and Repository admins push a change to a governed file, so every code owner merges one and the ruleset refuses a
+collaborator with write access only. Closed: Repository admins only (the decision of 2026-11-17). It closes once the
+governance structure is stable, by a change to the declaration, and it does not reopen: past the ratchet a governed
+file seldom changes, and a change to one has friction by design. Before it closes, version bumps leave the governed
+set: the action pins in `.github/workflows/*.yml` move with every dependency update, too often for a file under that
+control.
 
 ## The declaration and the check
 
@@ -168,8 +175,7 @@ change to the paper, with the template's `Paper` section filled), and name the i
 (`.github/dependabot.yml`: weekly, minor and patch bumps grouped per ecosystem, a major on its own); its own
 description stands in for the template and it names no issue (the dependency row of `.github/PR_ADMISSIBILITY.md`).
 A code owner reads the bump, confirms the test workflow ran green on it (lint, the fast shard), checks a
-moved pin is a full commit SHA with its version comment, and merges it with a merge commit, a Repository admin where
-it touches `.github/workflows/*.yml`; a red run leaves it open with the failure filed as an issue, and a major bump of
+moved pin is a full commit SHA with its version comment, and merges it with a merge commit; a red run leaves it open with the failure filed as an issue, and a major bump of
 a runtime dependency that changes behaviour is a candidate with a scope-of-work issue like any other. The steps in
 full are "Dependency updates" in `docs/code-owners.md`.
 

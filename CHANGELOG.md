@@ -36,7 +36,7 @@ All notable changes to this project are recorded here, in the format of
 
 - A pull request into `dev` is merged by a code owner, who may be its author; the rule that a second code owner
   merges every candidate is withdrawn, since work on `dev` stopped under it. The review by a second code owner is
-  the release's, into `main`, and a change to a governed file is pushed by a Repository admin. The merge check
+  the release's, into `main`. The merge check
   (`scripts/admissibility.py merge`) fails on a merge by anyone who is not a code owner (`GOVERNANCE.md`, "The two
   reviews"; WP82, Amendment 5).
 - The default workflow permissions are read and a workflow may not approve a pull request (the design's value; live
@@ -44,7 +44,9 @@ All notable changes to this project are recorded here, in the format of
   shards and `admissibility`; both declared in `.github/governance.toml` and set on GitHub after the merge (WP82).
 - The governed files (the secondary rules of `GOVERNANCE.md`) are under a declared control: a `CODEOWNERS` line per
   file naming the three code owners as the approvers of a change to it, and the `governance-files` push ruleset,
-  which refuses a push touching one of them by anyone but a Repository admin (WP82).
+  which refuses a push touching one of them by anyone but a maintainer or a Repository admin. That bypass is the
+  open position of a ratchet: it closes to Repository admins only once the governance structure is stable, after
+  version bumps have left the governed set (WP82, Amendment 6).
 - The admissibility documents: rows for a bug report and a question, the `controls` job in the pull request's
   conformance row, and each judged row naming its guideline (WP82).
 - The dependency route: Dependabot's pull requests target `dev` with the `dependencies` label, minor and patch bumps
