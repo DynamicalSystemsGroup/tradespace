@@ -770,3 +770,192 @@ To the handover (the candidate `dev` at eada5a3e; the dry run green; TestPyPI ho
 `dev` into `main` opened with the template's sections and `closes` the issue; the four required checks run on it;
 he merges by his bypass. The changelog's date stays 2026-11-17 (the day in his time zone; the changelog check binds
 no date) and is rewritten if the merge falls on a later day.
+
+## The merge (2026-11-17, 18:55 to 19:26 EST)
+
+With the four required checks green, the pull request's merge box showed "Review required" and no bypass checkbox.
+His words, verbatim, with the screenshot:
+
+> its done but i cannot merge without review
+
+The driver's reading through the API: the `main-review` ruleset names his user (`User:10465438`, pull requests
+only), the ruleset endpoint reports `current_user_can_bypass = pull_requests_only` for him, every required check of
+`main-checks` passed at 0dc2f4d2, and the review rule is the only block; the merge box had not rendered the bypass.
+He ran, under his own login:
+
+```
+gh pr merge 3 --repo DynamicalSystemsGroup/tradespace --merge --admin
+✓ Merged pull request DynamicalSystemsGroup/tradespace#3 (Release 0.1.0)
+```
+
+Then:
+
+> i merged it.
+
+**Applied as.** Merge commit 74e62fda, merged by `mzargham` at 19:25:57 EST on 2026-11-17 (00:25:57Z on the 18th),
+closing issue #2; the changelog's date 2026-11-17 stands (his time zone). The Release run 44207809538 on the merge
+commit is recorded in `WP68-rounds/record.md`, G9.
+
+## The 0.2 pull requests and the README (2026-11-17, 19:30 EST)
+
+Verbatim:
+
+> i merged it. one thing i noticed is the readme appears to be badly out of date. we need to get a readme update into
+> the 0.2 merge candidate. since i was able to merge v0.1, i do need to get to the 0.2 PR so danilo can review that.
+>
+> i want the following
+>
+> * an issue for release 0.2
+> * PR into dev for the governance updates
+> * PR into dev for the documentation and readme updates
+
+Then:
+
+> so i'll get 3 issues and 2 PRs at this time and we'll have a new PR from to dev to main after the 2 PRs clear into
+> main, correct?
+
+**Applied as.** Three issues: #12 (the 0.2 governance update, WP82; scope-of-work template, `draft` label), #13 (the
+0.2 documentation update: WP76, WP81, the README; the same template and label), #14 (Release 0.2.0: what it carries,
+the two reviews, the checklist; closed later by the pull request from `dev` into `main`). The two pull requests clear
+into `dev`, not `main`; the pull request from `dev` into `main` after both is the 0.2 release. The README update is
+a unit on `v0.2` in the documentation session (WP81 unit 4), so the documentation pull request (#15) opened as a
+draft and is marked ready once the README's install is verified against the live package. The governance pull
+request opens when WP82's amendment 1 (below) lands on its branch. The `draft` labels on #12 and #13 are his to
+remove (only a code owner turns a draft into an issue; both scopes he approved verbally).
+
+## Why 0.2.0 and not 0.1.1 (2026-11-17, 20:05 EST)
+
+Verbatim:
+
+> i recommend we also indicate that the governance update is the reason why this qualifies as an 0.2.0 rather than
+> an 0.1.1 since documentation updates since didn't touch the optimizer just the documentation and the governance
+> machinery
+
+**Applied as.** A section "Why 0.2.0 and not 0.1.1" in issue #14 (the package's code unchanged; documentation alone a
+patch; the governance update changes how a release is made, which is part of what each release attests) and one
+sentence in the governance pull request's description pointing at it.
+
+## Semantic versioning as governance (2026-11-17, 20:10 EST)
+
+Verbatim:
+
+> i think we probably need to ensure we have explicit guidance and checks for semantic versioning. this also probably
+> amounts to changes in the governance
+
+Asked where the rule lands, with the options "Amend WP82" (the rule, the surface snapshot and the check join the 0.2
+governance pull request before it opens), "Own package in 0.2" and "Own package after 0.2", his answer, verbatim:
+
+> Amend WP82
+
+**Applied as.** Amendment 1 of `WP82-scope-of-work.md`, built by a unit on the governance branch: a `Versions`
+section in `GOVERNANCE.md` (while the major is 0: a patch changes neither the package's public surface nor a governed
+file; a minor adds capability, changes the surface or changes a secondary rule; the major moves on a breaking change
+once the surface is a commitment), a committed snapshot of the public surface with a test that it matches the live
+package, and the release check `version-kind` in the release workflow's admissibility job (a patch bump with a changed
+surface, a changed governed file or an `Added`/`Removed` changelog section fails before anything publishes); the row
+in `.github/RELEASE_ADMISSIBILITY.md`; no setting on GitHub. Issue #12 and issue #14 amended the same evening.
+
+## The documentation and the live package (2026-11-17, 20:15 EST)
+
+Verbatim:
+
+> its also worth noting that the documentation update can now account for this package being live on pip which can
+> verify once the release lands
+
+**Applied as.** The README and every install instruction on the docs pages lead with the released package
+(`pip install tradespace`, `uv add tradespace`), the clone-and-sync form kept for work on the package; verified in a
+fresh virtual environment outside the repository once PyPI served 0.1.0 (01:35Z), the command and its output in the
+unit's record on `v0.2`.
+
+## The Dependabot pull requests (2026-11-17, 20:50 to 21:15 EST)
+
+With a screenshot of pull requests #4 to #11 (eight bumps by Dependabot, each "Review required", 15 of 18 checks
+failing), verbatim:
+
+> we're going to need to handle this stuff. in v0.2 if possible
+
+The driver's finding: `.github/dependabot.yml` named no target branch, so the bumps targeted `main` and were judged
+as releases (the release admissibility, the template fields and the linked-issue rule failed; `controls` and the
+three test shards passed on every one). Asked where the route lands, with the options "Amend WP82", "Own package in
+0.2" and "After 0.2", his answer, verbatim:
+
+> Amend WP82
+
+Then, after removing the `draft` labels on #12 and #13 himself (the label gate recorded a code owner on each),
+verbatim:
+
+> i unmarked draft on the 0.2 issues. i also think we should extend our governance PR content to provide instructions
+> for how dependabot PRs should be handled since it seems like they will be a common occurance (some of our
+> dependencies are advancing rather quickly)
+
+**Applied as.** Amendment 2 of `WP82-scope-of-work.md`: `.github/dependabot.yml` targets `dev`, names the
+`dependencies` label and groups minor and patch bumps into one weekly pull request per ecosystem with majors on
+their own; the pull request checks pass a dependency update by the bot against `dev` with the label; the Tests
+workflow runs on such pull requests as on a push to `dev`; a code owner merges, an admin where an action pin moves;
+the row in `.github/PR_ADMISSIBILITY.md`; the steps for a code owner as the section "Dependency updates" of
+`docs/code-owners.md`, in brief in `GOVERNANCE.md`. After the merge a code owner triggers Dependabot's check for
+updates and closes the eight against `main` with a comment naming the route. The governance pull request #16 carries
+WP82 with both amendments.
+
+## The dependency updates as one pull request (2026-11-17, 21:50 to 22:05 EST)
+
+Verbatim, in order:
+
+> all the dependabot PRs have broken CI
+
+> i want to clean up all the dependabot updates into one PR and it needs to pass CI. since as it stands its a bit
+> attention hungry
+
+**Applied as.** The eight bumps (#4 to #11) taken as one change into `dev` on the branch `deps-2026-11`: seven of
+Dependabot's commits cherry-picked with their origin named, the `checkout` bump applied by hand beside the `setup-uv`
+bump with the same SHA and comment; `uv.lock` carries ruff 0.17.5, mystmd 1.13.0, z3-solver 5.4.1.0. Verified
+locally (lock, lint under the new ruff, format, the pins check, the workflow tests, the fast suite) and on the
+runners (the Tests workflow dispatched with Windows; the release dry run on `qc/release`, which carries the
+artefacts through `upload-artifact` 7 and `download-artifact` 4.3.0 together). Opened as a pull request with its
+scope-of-work issue once green; the eight closed against it with a comment. The failing checks on the eight were
+the release admissibility, the template fields and the linked-issue rule, since they targeted `main`; their test
+shards were green.
+
+## The gates are prepared, not relaxed (2026-11-17, 22:20 EST)
+
+The release dry run of the dependency branch was refused by the tag rule (`v0.1.0` sits on `main`'s merge commit,
+which is not an ancestor of a `dev`-based head, and the package files had changed), and the driver's hand-made
+throwaway bump to 0.1.1 missed one of the six places the version is written (the contract document's quoted value;
+`tests/test_interface_contract.py` caught it). Verbatim:
+
+> do we need to update how we do dry runs or how we prepare our code before dry runs so we don't have these kinds
+> of errors in the future. in general i'd prefer to set up our processes to not fail the gate, than relax the gate
+
+Asked where the release-preparation tooling lands (the one-command version bump, the gates runnable locally, the
+page naming them), with the options "Own package in 0.2", "Amend WP82" and "After 0.2", his answer, verbatim:
+
+> Amend WP82
+
+Then (22:35 EST), verbatim:
+
+> i am also seeing branch sprawl on github remote. another SOP we may need integrated into our governance work is
+> making sure we're cleaning up after ourselves
+
+**Applied as.** Amendment 3 of `WP82-scope-of-work.md`, on the open governance pull request #16: `release_checks.py
+bump <version>` writes every place the version is written and the changelog heading (a test proves the set of
+places complete); `release_checks.py gates [--release]` runs the executable criteria locally in one command, the
+step before a report, a push, a pull request or a dry run; the dry-run procedure written on the code owners' page (a
+throwaway `bump <next patch> --changelog stub` commit on a `qc/` branch, never merged, deleted after); a "Branches"
+rule in `GOVERNANCE.md` (long-lived `main`, `dev`, `paper`; a pull request's branch deleted at its merge by the
+repository setting, declared as `delete_branch_on_merge` and checked; `qc/*` deleted after its run; a bot's branch
+with its pull request; local worktrees retired at the landing) with `release_checks.py branches` listing the remote
+branches outside the rule, and the setting as item 6 of his list after the merge. Tonight's dry run of the
+dependency branch runs on a hand-made throwaway commit of that shape (`qc/release` at dfcee17a), deleted after.
+
+## The Dependabot pull requests closed into an issue (2026-11-17, 23:05 EST)
+
+Verbatim:
+
+> also the dependabot issues are really irking me. i feel like they should be processed into an issue to bring the
+> dependencies up to speed and closed. that way they won't disract my team members from the PRs i actually need
+> them to look at.
+
+**Applied as.** Issue #17 ("Dependency updates after 0.1.0: the eight Dependabot bumps as one change into dev", the
+scope-of-work template, `draft` label for his click) opened at once; pull requests #4 to #11 closed with a one-line
+comment naming #17 and the route in #16, their branches deleted. The consolidated pull request from `deps-2026-11`
+closes #17 once its Tests dispatch with Windows and its release dry run are green.

@@ -2686,3 +2686,72 @@ result is a verdict on a commit and cannot be disturbed by agents at work. First
 - **The candidate: `dev` at e64d402d (23:05).** The dry run at 7b0d7cdf (44180529672) green end to end with `controls` first (`conforming (58 fields on the runner; 6 local-only)`); e64d402d adds his one-line navigation title (`User guide`), push run 44184904829 green, 8797 restaged. `qc/release` deleted. Nothing outward beyond the TestPyPI test project and issue #1. Handover written to him: the release issue and the pull request open on his word.
 - **His word: "Go, open the PR" (23:15).** The release issue and the pull request from `dev` into `main` opened from eada5a3e; links below.
 - **The release issue and the pull request are open (23:25).** Issue https://github.com/DynamicalSystemsGroup/tradespace/issues/2 ("Release 0.1.0", the text of `WP68-rounds/release-issue.md`); pull request https://github.com/DynamicalSystemsGroup/tradespace/pull/3 from `dev` into `main`, closing the issue, with the template's sections filled. On opening: `controls` green three times (the Tests run, the Release run's own and its called copy), admissibility and the three shards running, mergeable, review required (the `main-review` rule; his bypass merges it). The PR is bound to this session's monitor.
+- **The bypass through the API (18:55 to 19:26, 2026-11-17).** With the four checks green the merge box showed "Review
+  required" and no bypass checkbox. Read through the API: `main-review` names his user, the ruleset endpoint reports
+  `current_user_can_bypass = pull_requests_only` for him, `main-checks` satisfied, `viewerCanMergeAsAdmin` false (that
+  field is the legacy admin override, not a ruleset bypass). He merged with `gh pr merge 3 --merge --admin` under his
+  login: 74e62fda at 19:25:57 EST, by `mzargham`, closing #2. Lesson: GitHub's merge box did not render the ruleset
+  bypass for a user-type bypass actor on this pull request, while the merge API applied it; a code owner with a bypass
+  merges from the command line when the box does not offer it.
+- **The release (19:26 to 20:35).** Run 44207809538 on 74e62fda green end to end: `controls`, admissibility, build,
+  the three shards (the slow one 66 min, as in the dry run), the site, the tag `v0.1.0`, PyPI (0.1.0, wheel and sdist),
+  the deploy, the GitHub release with the attestation line. The live checks at 20:40: every punch-list page 200, the
+  metadata present, the triangle's three labels as on the Mac, all GitHub links on the site and in the files 200, no
+  console error on a fresh docs page. `WP68-rounds/record.md` G9; the checklist rows C6, F1, F7, G1, G2s. `paper`
+  fast-forwarded to 0dc2f4d2 at 19:27 (no commits of its own; no merge commit); its push run 44207902935 is the first
+  paper run with WP79's fixes. Left to him: `danlessa` as Owner on PyPI and TestPyPI.
+- **The 0.2 start, on his word (19:30 to 20:45).** Issues #12 (WP82, `draft`), #13 (WP76, WP81, the README,
+  `draft`), #14 (Release 0.2.0, with his "Why 0.2.0 and not 0.1.1" and the versioning rule after his 20:05 and 20:10
+  words; `WP64-decisions.md`). The governance branch rebased onto `dev` 0dc2f4d2 as `gov-pr` (clean); lint, format,
+  lock, the checker (fixture 69 fields; runner 62 and 7 local-only; live, the five differences), vocabulary and 104
+  governance tests green; the fast suite 1 failed on the docs-page rule (`WP82` and `tests/data/wp78` on the code
+  owners' page, case-insensitive `\bWP\d+\b`), reworded in two commits (ea99dfdb, 9e9a4037), the site module 79
+  passed on the released tree as a control. WP82 amendment 1 (the versioning rule, snapshot and `version-kind`
+  check) dispatched as a unit on the branch; the pull request opens when it lands. The documentation session rebased
+  `v0.2` (31 commits over 0dc2f4d2, the register rows renumbered) and committed the README unit at 9e64d44d (fast
+  suite 2,045 passed); pushed, pull request #15 opened as a draft (`closes #13`; both admissibility checks green),
+  marked ready after the fresh-venv install against PyPI. The `draft` labels are his to remove.
+- **The two 0.2 pull requests are open (20:55 to 21:45).** #15, the documentation update (`v0.2` into `dev`, closes
+  #13; head 6dd538a6 with the README unit and the install verified against PyPI in a fresh environment; fast suite
+  2,045 at the unit's head; both admissibility checks green; marked ready for Danilo at 21:00). #16, the governance
+  update (`governance-bypass-removal` into `dev`, closes #12; head 5c4c6471 = WP82 rebased onto 0dc2f4d2 + the two
+  docs-page rewordings + amendment 1 (the versioning rule, the surface record, `version-kind`) + amendment 2 (the
+  Dependabot route with his instructions ask). Verified at 5c4c6471 by the driver: lint, format, lock, `pins`, the
+  checker on the fixture (69 fields), the surface check, `version-kind` (`v0.1.0 is already a tag`), vocabulary 0
+  new, 152 targeted tests, the fast suite 2,059 passed; no attribution line in 21 commits. Both units' reports and
+  the driver's re-runs agree. The `draft` labels on #12 and #13 removed by him (the label gate green on both).
+  His words of 20:50 to 21:15 verbatim in `WP64-decisions.md`. After Danilo merges #16 he changes the five settings
+  in order and runs Dependabot's check for updates; the eight bumps against `main` close then.
+- **Worktrees and branches of the landed units retired (21:50, his "Yes, retire them").** Removed: the fourteen
+  worktrees of landed units and old spikes (the WP78, WP79, WP79b, WP80, WP82 unit worktrees; `gov-pr`; the scratch
+  worktrees `wp8b-drafts`, `wp51fig`, `wp55`, `wp55spike`, `wp56-ternary`, `wp56spike`, `stage` with its port-8000
+  server stopped). Deleted: the branches whose every patch is in `dev` by `git cherry` or in
+  `origin/governance-bypass-removal` (wp78, wp79b, wp80, rehearsal, the WP77 unit branch, wp8b-drafts, gov-pr,
+  wp82-versions, wp82-dependabot, the three `*-land` branches, the harness's `worktree-agent-*` branches). Kept, as
+  refs with patches not in `dev`: `wp51fig` (25), `wp55` (5), `wp55spike` (3), `wp56-ternary` (1), `wp56spike` (3),
+  `wp30b-notebooks` (2 of 33), `preview/site` (1, an old local preview); `v0.2-pre-rebase` and
+  `claude/iron-triangle-example-12a7c6` (the documentation session's); the local `governance-bypass-removal` at
+  1c728c3d in the other session's scratch worktree (stale against the pushed branch; that session's to reset).
+  Kept worktrees: `final-stage` (the staging build), `wp75`, the iron-triangle worktree. The seven kept spike refs
+  are for a tidiness decision: each is a record that landed in another form, and a branch left unmerged is the only
+  thing that keeps its commits.
+- **The dependency updates as one change (21:55 to 22:10).** Branch `deps-2026-11` over `dev` 0dc2f4d2 (the
+  records commits since are not needed by it): Dependabot's eight bumps, seven cherry-picked clean, `checkout`
+  applied by hand (its lines beside `setup-uv`'s). Local: lock clean, ruff 0.17.5 clean, format clean, pins clean,
+  79 workflow tests; the fast suite running. Runners: Tests dispatched with Windows (44220588377) and the release
+  dry run on `qc/release` (44220587981). The issue and the pull request open on green; the eight close against it.
+- **The dependency branch's dry run, refused then rehearsed (22:05 to 22:45).** The fast suite at 89f7bec3: 2,022
+  passed, 14 skipped (the two beyond `dev`'s twelve are `tests/test_wp45_examples.py`, "archive not fetched" in the
+  fresh worktree, an environment skip, not the bumps). The dry run on `qc/release` at 89f7bec3 (44220587981)
+  refused in admissibility: `v0.1.0 is on 74e62fda, which is not an ancestor of 89f7bec3`: the tag rule, correct for
+  a `dev`-based head at a released version with changed package files. Rehearsed instead on a throwaway commit
+  (version 0.1.1 in the six places, the lock re-locked, a changelog stub), the first attempt missing the contract
+  document's quoted value (caught by `test_r8_document_quotes_the_manifest`; the push at e33cd128 went out on a
+  piped exit code and its run 44221478489 was cancelled), the second at dfcee17a green on the version tests and
+  pushed; its run is watched. The Tests dispatch with Windows (44220588377) runs. His words on preparing the gates
+  and on branch sprawl are in `WP64-decisions.md`; amendment 3 of WP82 is a unit on the pull request's branch. The
+  lesson for the driver: never gate a push on a piped exit code; the bump and the gates become one command each.
+- **The eight Dependabot pull requests closed into issue #17 (23:05, his word).** Opened #17 from the prepared
+  scope text; closed #4 to #11 with the comment and `--delete-branch`; the remote now holds `main`, `dev`, `paper`,
+  the two pull-request branches, `deps-2026-11` and the transient `qc/release`. The consolidated pull request opens
+  on green (the Tests dispatch 44220588377 and the dry run 44223300180 at the throwaway 0.1.1, both in progress).

@@ -52,6 +52,22 @@ the review rule without the bypass:
   builds from `paper/` in the repository, since every docs `paper:` link lands there in abstract mode (not changed
   for 0.1, by his direction not to disrupt the release).
 
+## The 0.2 board in motion (2026-11-17, 20:45 EST; 0.1 released at 74e62fda)
+
+- Issues: #14 Release 0.2.0 (what it carries, "Why 0.2.0 and not 0.1.1", the two reviews, the checklist; closed by
+  the pull request from `dev` into `main`); #12 the governance update (WP82 with amendment 1, the versioning rule);
+  #13 the documentation update (WP76, WP81, the README). #12 and #13 carry the `draft` label until a code owner
+  removes it.
+- Pull requests into `dev`, each reviewed and merged by a code owner other than the author (Danilo): #15 the
+  documentation update from `v0.2` (ready since 21:00 EST; the README's install verified against PyPI); #16 the
+  governance update from `governance-bypass-removal` (WP82 with amendment 1, the versioning rule, and amendment 2,
+  the Dependabot route; ready since 21:45 EST). The governance change is kept apart from the content. After #16
+  merges: the five settings in order, Dependabot's check for updates, the eight bumps against `main` closed.
+- After both: version 0.2.0, the changelog entry, the dry run, the pull request from `dev` into `main` under the
+  review rule without a bypass; the settings changes of WP82 done in order after its merge (`WP82-decisions.md`,
+  "Execution").
+- Not for 0.2 unless he says so: the directions backlog; the paper's first pin; Zenodo; the macOS runner (#1).
+
 ## Current state (2026-11-15 13:28 EST; dev at 022c4d2; the section of 2026-11-14 22:56 kept below as history)
 
 The candidate he reviewed on the morning of 2026-11-15 (content head a63d390, fully green) is being reworked under his
