@@ -320,7 +320,12 @@ def _runs(job: dict) -> str:
 
 
 def _uses(job: dict) -> list[str]:
-    return [step["uses"].split("@")[0] for step in job["steps"] if "uses" in step]
+    # a wrapped action is called as ./.github/actions/<action> (the pin sits in the wrapper)
+    return [
+        step["uses"].split("@")[0].removeprefix("./.github/actions/")
+        for step in job["steps"]
+        if "uses" in step
+    ]
 
 
 def test_paper_workflow_triggers_and_tag_filter(workflow):
@@ -356,7 +361,7 @@ def test_paper_workflow_triggers_and_tag_filter(workflow):
     ):
         assert needle in runs, needle
     assert "actions/setup-node" in _uses(build)
-    node = next(s for s in build["steps"] if s.get("uses", "").startswith("actions/setup-node"))
+    node = next(s for s in build["steps"] if s.get("uses", "").endswith("actions/setup-node"))
     assert node["with"]["node-version"] == "22"
     test_yml = yaml.safe_load((ROOT / ".github" / "workflows" / "test.yml").read_text("utf-8"))
 

@@ -546,7 +546,7 @@ version literal in `release.yml`; workflow dependency lockfiles and the `$/` ref
   `actions/setup-node` and `actions/upload-pages-artifact`. Each is a composite action of one step, the action at the
   commit the workflows carried, with its `# v` comment; its inputs are the ones this repository's workflows set,
   passed through under their own names; `actions/cache/restore` re-exports `cache-hit`.
-- **D-32** The workflows call `./.github/actions/<owner>/<action>` in place of each wrapped action (51 calls in nine
+- **D-32** The workflows call `./.github/actions/<owner>/<action>` in place of each wrapped action (35 calls in nine
   files). `actions/checkout`, `pypa/gh-action-pypi-publish` and `actions/deploy-pages` stay pinned in the workflows.
 - **D-33** `release.yml`, `publish-testpypi`: a checkout step and `contents: read`, since the job calls a wrapped
   action (`actions/download-artifact`) and a local action exists only after a checkout. `release.yml`, the `pins`

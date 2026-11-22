@@ -47,6 +47,12 @@ All notable changes to this project are recorded here, in the format of
   which refuses a push touching one of them by anyone but a maintainer or a Repository admin. That bypass is the
   open position of a ratchet: it closes to Repository admins only once the governance structure is stable, after
   version bumps have left the governed set (WP82, Amendment 6).
+- The action pins sit outside the governed workflows: a workflow calls a third-party action through a wrapper under
+  `.github/actions/`, a composite action of one step that holds the pinned commit, so a dependency update of an
+  action changes no governed file and no longer forces a minor release. `actions/checkout`,
+  `pypa/gh-action-pypi-publish` and `actions/deploy-pages` cannot be wrapped and keep their pins in the workflows.
+  `scripts/release_checks.py pins` holds each wrapper to its one step and refuses a third-party action called
+  directly; `.github/dependabot.yml` names each wrapper's directory (WP82, Amendment 7).
 - The admissibility documents: rows for a bug report and a question, the `controls` job in the pull request's
   conformance row, and each judged row naming its guideline (WP82).
 - The dependency route: Dependabot's pull requests target `dev` with the `dependencies` label, minor and patch bumps

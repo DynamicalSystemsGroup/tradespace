@@ -82,13 +82,16 @@ files are there. Each is a script in `scripts/admissibility.py`; none runs code 
 
 ## Pinned actions
 
-Every third-party action in `.github/workflows/` is pinned to its full commit SHA, with the release tag in a
-trailing comment. A tag can be moved to different code after the fact; a SHA cannot, so a compromised action
-release cannot reach the publishing job unseen. Dependabot (`.github/dependabot.yml`, weekly, for `github-actions`
-and `uv`) opens a pull request that moves a pin and its comment together; read the action's release notes, then
-merge into `dev`. To move one by hand, resolve the new tag with
-`gh api repos/<owner>/<repo>/git/ref/tags/<tag>` (follow an annotated tag to its commit) and replace both the SHA
-and the comment. The Release workflow refuses a release while any action is unpinned.
+Every third-party action is pinned to its full commit SHA, with the release tag in a trailing comment. A tag can be
+moved to different code after the fact; a SHA cannot, so a compromised action release cannot reach the publishing
+job unseen. An action's pin sits in its wrapper, `.github/actions/<owner>/<action>/action.yml`, one step that a
+workflow calls after its checkout, so a version bump changes no governed workflow; `actions/checkout`,
+`pypa/gh-action-pypi-publish` and `actions/deploy-pages` keep their pins in the workflows (`GOVERNANCE.md`, "The
+secondary rules"). Dependabot (`.github/dependabot.yml`, weekly, for `github-actions` and `uv`) opens a pull request
+that moves a pin and its comment together; read the action's release notes, then merge into `dev`. To move one by
+hand, resolve the new tag with `gh api repos/<owner>/<repo>/git/ref/tags/<tag>` (follow an annotated tag to its
+commit) and replace both the SHA and the comment. The Release workflow refuses a release while
+`scripts/release_checks.py pins` fails.
 
 ## Reviewing a candidate
 
@@ -116,8 +119,9 @@ fast shard. When one arrives:
    every pull request into `dev`, so a missing run means something else (a conflict with `dev`, a closed or
    retargeted pull request): comment <code>&#64;dependabot rebase</code> and it runs on the bot's push.
 3. For a workflow-action bump: the pin is a full commit SHA with the new version in its trailing comment (`uv run
-   python scripts/release_checks.py pins` on the branch). The push ruleset `governance-files` covers
-   `.github/workflows/*.yml`, and a maintainer or an admin passes it.
+   python scripts/release_checks.py pins` on the branch). The bump touches a wrapper under `.github/actions/` and
+   no workflow; a bump of `actions/checkout`, `pypa/gh-action-pypi-publish` or `actions/deploy-pages` touches
+   `.github/workflows/*.yml`, a governed path that a maintainer or an admin pushes.
 4. For a `uv` bump: `uv.lock` is the only file touched beyond `pyproject.toml`, and `uv lock --check` passes on the
    branch (the fast shard runs it).
 5. Merge with a merge commit. The merge check records that a code owner merged it.

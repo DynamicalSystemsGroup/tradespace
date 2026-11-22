@@ -1,0 +1,19 @@
+# The pin of actions/cache/save, outside the governed workflows (GOVERNANCE.md, "The secondary rules").
+# One step and nothing else: scripts/release_checks.py pins holds this file to that shape.
+name: actions/cache/save
+description: actions/cache/save at its pinned commit, the inputs passed through.
+inputs:
+  path:
+    description: The paths to save.
+    required: true
+  key:
+    description: The cache key.
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: action
+      uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ inputs.path }}
+        key: ${{ inputs.key }}

@@ -85,9 +85,16 @@ The ruleset's bypass is a ratchet with two positions (decided 2026-11-22). Open,
 role and Repository admins push a change to a governed file, so every code owner merges one and the ruleset refuses a
 collaborator with write access only. Closed: Repository admins only (the decision of 2026-11-17). It closes once the
 governance structure is stable, by a change to the declaration, and it does not reopen: past the ratchet a governed
-file seldom changes, and a change to one has friction by design. Before it closes, version bumps leave the governed
-set: the action pins in `.github/workflows/*.yml` move with every dependency update, too often for a file under that
-control.
+file seldom changes, and a change to one has friction by design.
+
+Version bumps stay out of the governed set, since they come too often for a file under that control. A workflow calls
+a third-party action through a wrapper, `.github/actions/<owner>/<action>/action.yml`: a composite action of one
+step that holds the action's pinned commit and passes its inputs through. A dependency update moves the pin in the
+wrapper and leaves the workflow alone. The wrappers are not governed; `scripts/release_checks.py pins` holds each to
+that one step and refuses a third-party action called directly in a workflow. Three actions cannot be wrapped and
+keep their pins in the workflows, so a bump of one is a governed change: `actions/checkout` (a local action exists
+only after the checkout), `pypa/gh-action-pypi-publish` (it does not support a call from a composite action) and
+`actions/deploy-pages` (its job checks nothing out).
 
 ## The declaration and the check
 

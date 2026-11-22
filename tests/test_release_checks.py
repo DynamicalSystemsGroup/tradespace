@@ -54,13 +54,127 @@ def test_every_action_in_this_repository_is_pinned_to_a_commit():
     assert rc.pin_problems(ROOT) == []
 
 
-def test_an_action_pinned_to_a_tag_is_refused(tmp_path):
+# The pins (WP82 Amendment 7): a workflow calls a third-party action through its wrapper under
+# .github/actions/, which holds the pin and nothing else, so a version bump leaves the governed
+# workflows alone. SHA is any full commit.
+SHA = "0123456789abcdef0123456789abcdef01234567"
+CHECKOUT = f"      - uses: actions/checkout@{SHA} # v5.1.0\n"
+WRAPPER = f"""name: acme/tool
+description: acme/tool at its pinned commit.
+inputs:
+  key:
+    description: The key.
+    required: true
+outputs:
+  hit:
+    description: Whether it hit.
+    value: ${{{{ steps.action.outputs.hit }}}}
+runs:
+  using: composite
+  steps:
+    - id: action
+      uses: acme/tool@{SHA} # v1.2.3
+      with:
+        key: ${{{{ inputs.key }}}}
+"""
+
+
+def _pin_tree(tmp_path, steps, wrapper=WRAPPER):
     wf = tmp_path / ".github" / "workflows"
     wf.mkdir(parents=True)
     (wf / "a.yml").write_text(
-        "steps:\n  - uses: actions/checkout@v5\n  - uses: ./x\n", encoding="utf-8"
+        "jobs:\n  one:\n    runs-on: ubuntu-24.04\n    steps:\n" + steps, encoding="utf-8"
     )
-    assert rc.pin_problems(tmp_path) == ["a.yml: `actions/checkout@v5` is not pinned to a commit"]
+    if wrapper is not None:
+        path = tmp_path / ".github" / "actions" / "acme" / "tool" / "action.yml"
+        path.parent.mkdir(parents=True)
+        path.write_text(wrapper, encoding="utf-8")
+    return tmp_path
+
+
+CALL = "      - uses: ./.github/actions/acme/tool\n"
+REL = ".github/actions/acme/tool/action.yml"
+
+
+def test_an_action_pinned_to_a_tag_is_refused(tmp_path):
+    root = _pin_tree(tmp_path, "      - uses: actions/checkout@v5\n", wrapper=None)
+    assert rc.pin_problems(root) == ["a.yml: `actions/checkout@v5` is not pinned to a commit"]
+
+
+def test_a_wrapped_action_called_after_a_checkout_passes(tmp_path):
+    assert rc.pin_problems(_pin_tree(tmp_path, CHECKOUT + CALL)) == []
+
+
+def test_a_third_party_action_called_directly_is_refused(tmp_path):
+    root = _pin_tree(tmp_path, CHECKOUT + f"      - uses: acme/tool@{SHA} # v1.2.3\n", wrapper=None)
+    (problem,) = rc.pin_problems(root)
+    assert "`acme/tool` is called directly" in problem and "./.github/actions/acme/tool" in problem
+
+
+def test_the_actions_that_cannot_be_wrapped_stay_pinned_in_the_workflow(tmp_path):
+    steps = "".join(f"      - uses: {a}@{SHA} # v1.0.0\n" for a in sorted(rc.DIRECT_ACTIONS))
+    assert rc.pin_problems(_pin_tree(tmp_path, steps, wrapper=None)) == []
+    direct = {"actions/checkout", "pypa/gh-action-pypi-publish", "actions/deploy-pages"}
+    assert direct == rc.DIRECT_ACTIONS
+
+
+def test_a_local_action_before_the_checkout_is_refused(tmp_path):
+    (problem,) = rc.pin_problems(_pin_tree(tmp_path, CALL + CHECKOUT))
+    assert "the job `one` calls `./.github/actions/acme/tool` before a checkout" in problem
+
+
+def test_a_missing_wrapper_and_an_uncalled_wrapper_are_refused(tmp_path):
+    assert rc.pin_problems(_pin_tree(tmp_path, CHECKOUT + CALL, wrapper=None)) == [
+        f"{REL} is missing; a workflow calls it"
+    ]
+    other = tmp_path / "other"
+    assert rc.pin_problems(_pin_tree(other, CHECKOUT)) == [f"{REL} is called by no workflow"]
+
+
+@pytest.mark.parametrize(
+    "old, new, message",
+    [
+        (f"acme/tool@{SHA} # v1.2.3", "acme/tool@v1 # v1.2.3", "is not pinned to a commit"),
+        (f"acme/tool@{SHA} # v1.2.3", f"acme/tool@{SHA}", "carries no `# v<version>` comment"),
+        (f"acme/tool@{SHA}", f"evil/tool@{SHA}", "the step uses `evil/tool`, not `acme/tool`"),
+        ("${{ inputs.key }}", "fixed", "each input is passed through under its own name"),
+        ("        key: ${{ inputs.key }}\n", "", "each input is passed through under its own name"),
+        ("steps.action.outputs.hit", "steps.action.outputs.other", "the output `hit` is the step"),
+        (
+            "    - id: action\n",
+            "    - run: curl example.org\n      shell: bash\n    - id: action\n",
+            "a composite action of exactly one step",
+        ),
+        (
+            "      with:\n",
+            "      env:\n        A: b\n      with:\n",
+            "`id`, `uses` and `with` only",
+        ),
+        (
+            "runs:\n",
+            "branding:\n  icon: x\nruns:\n",
+            "only name, description, inputs, outputs and runs",
+        ),
+    ],
+)
+def test_a_wrapper_that_is_more_than_a_pin_is_refused(tmp_path, old, new, message):
+    assert WRAPPER.count(old) == 1
+    problems = rc.pin_problems(
+        _pin_tree(tmp_path, CHECKOUT + CALL, wrapper=WRAPPER.replace(old, new))
+    )
+    assert any(message in p for p in problems), problems
+
+
+def test_dependabot_reads_every_wrapper_directory():
+    """Dependabot finds a composite action's pin only in a directory named to it."""
+    config = yaml.safe_load((ROOT / ".github" / "dependabot.yml").read_text(encoding="utf-8"))
+    (actions,) = [u for u in config["updates"] if u["package-ecosystem"] == "github-actions"]
+    wrappers = {
+        "/" + p.parent.relative_to(ROOT).as_posix()
+        for p in (ROOT / ".github" / "actions").rglob("action.yml")
+    }
+    assert len(wrappers) == 8
+    assert set(actions["directories"]) == {"/"} | wrappers and "directory" not in actions
 
 
 def _lock(tmp_path):

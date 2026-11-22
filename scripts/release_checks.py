@@ -89,8 +89,16 @@ from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-USES = re.compile(r"^\s*(?:-\s+)?uses:\s*(\S+)", re.M)
 PINNED = re.compile(r"^[\w.-]+/[\w.-]+(?:/[\w./-]+)?@[0-9a-f]{40}$")
+# Where a workflow finds a third-party action: its wrapper, a local composite action that holds the
+# pin. The three below stay pinned in the workflow, each for a reason: a local action exists only
+# after the checkout; pypa/gh-action-pypi-publish states that a call from a composite action is
+# unsupported (its README, "Non-goals"); the Pages deploy job checks nothing out and holds no
+# contents permission.
+LOCAL_ACTIONS = "./.github/actions/"
+DIRECT_ACTIONS = frozenset(
+    {"actions/checkout", "pypa/gh-action-pypi-publish", "actions/deploy-pages"}
+)
 # The files whose change needs a new version; a merge that leaves them unchanged since the tag
 # redeploys the site only.
 PACKAGE_FILES = ("src", "pyproject.toml", "uv.lock")
@@ -132,12 +140,97 @@ def changelog_problems(root: Path, version: str, final: bool) -> list[str]:
     return [f"CHANGELOG.md has no entry `## [{version}]` with content"]
 
 
-def pin_problems(root: Path) -> list[str]:
+def _wrapper_problems(root: Path, action: str) -> list[str]:
+    """Hold ``.github/actions/<action>/action.yml`` to its shape: one step, the pin of ``action``.
+
+    The wrapper runs inside a governed workflow and is not governed itself, so it may hold a
+    pin and nothing else: a composite action of one step, ``uses: <action>@<commit>`` with the
+    version in a trailing comment, each ``with`` value the input of the same name, each output
+    the step's output of the same name.
+    """
+    rel = f".github/actions/{action}/action.yml"
+    path = root / rel
+    if not path.is_file():
+        return [f"{rel} is missing; a workflow calls it"]
+    import yaml  # the project's environment (uv run --locked), as for version-kind
+
+    text = path.read_text(encoding="utf-8")
+    doc = yaml.safe_load(text)
+    runs = doc.get("runs") or {}
+    steps = runs.get("steps") or []
+    if set(doc) - {"name", "description", "inputs", "outputs", "runs"}:
+        return [f"{rel}: only name, description, inputs, outputs and runs belong in a wrapper"]
+    if set(runs) != {"using", "steps"} or runs["using"] != "composite" or len(steps) != 1:
+        return [f"{rel}: a wrapper is a composite action of exactly one step"]
+    (step,) = steps
+    if set(step) - {"id", "uses", "with"} or "uses" not in step:
+        return [f"{rel}: the step holds `id`, `uses` and `with` only"]
     problems = []
+    ref = str(step["uses"])
+    if not PINNED.match(ref):
+        problems.append(f"{rel}: `{ref}` is not pinned to a commit")
+    if ref.partition("@")[0] != action:
+        problems.append(f"{rel}: the step uses `{ref.partition('@')[0]}`, not `{action}`")
+    if not re.search(rf"^\s*uses:\s*{re.escape(ref)} # v\S+\s*$", text, re.M):
+        problems.append(f"{rel}: the pin carries no `# v<version>` comment")
+    inputs = doc.get("inputs") or {}
+    passed = step.get("with") or {}
+    if set(passed) != set(inputs) or any(
+        str(v).strip() != f"${{{{ inputs.{k} }}}}" for k, v in passed.items()
+    ):
+        problems.append(f"{rel}: each input is passed through under its own name, nothing else")
+    for name, out in (doc.get("outputs") or {}).items():
+        want = f"${{{{ steps.{step.get('id')}.outputs.{name} }}}}"
+        if str((out or {}).get("value", "")).strip() != want:
+            problems.append(f"{rel}: the output `{name}` is the step's output of that name")
+    return problems
+
+
+def pin_problems(root: Path) -> list[str]:
+    """The action pins: where they live, and that each is a full commit.
+
+    A workflow calls a third-party action through its wrapper, ``./.github/actions/<action>``,
+    so a version bump leaves the governed workflows alone (GOVERNANCE.md, "The secondary rules").
+    ``DIRECT_ACTIONS`` are the ones that cannot be wrapped and stay pinned in the workflow. A job
+    checks the repository out before its first local action. Each wrapper is held to its shape
+    and each one present is called.
+    """
+    import yaml  # the project's environment (uv run --locked), as for version-kind
+
+    problems = []
+    called: set[str] = set()
     for wf in sorted((root / ".github" / "workflows").glob("*.yml")):
-        for ref in USES.findall(wf.read_text(encoding="utf-8")):
-            if not (ref.startswith("./") or PINNED.match(ref)):
-                problems.append(f"{wf.name}: `{ref}` is not pinned to a commit")
+        doc = yaml.safe_load(wf.read_text(encoding="utf-8")) or {}
+        for job_id, job in (doc.get("jobs") or {}).items():
+            checked_out = False
+            for step in [job, *(job.get("steps") or [])]:
+                ref = str(step.get("uses") or "")
+                action = ref.partition("@")[0]
+                if not ref or ref.startswith("./.github/workflows/"):
+                    continue
+                if ref.startswith(LOCAL_ACTIONS):
+                    called.add(ref.removeprefix(LOCAL_ACTIONS))
+                    if not checked_out:
+                        problems.append(
+                            f"{wf.name}: the job `{job_id}` calls `{ref}` before a checkout"
+                        )
+                elif not PINNED.match(ref):
+                    problems.append(f"{wf.name}: `{ref}` is not pinned to a commit")
+                elif action not in DIRECT_ACTIONS:
+                    problems.append(
+                        f"{wf.name}: `{action}` is called directly; it goes through "
+                        f"`{LOCAL_ACTIONS}{action}`, so its version moves outside the workflows"
+                    )
+                checked_out = checked_out or action == "actions/checkout"
+    present = {
+        p.parent.relative_to(root / ".github" / "actions").as_posix()
+        for p in (root / ".github" / "actions").rglob("action.yml")
+    }
+    for action in sorted(called | present):
+        problems += _wrapper_problems(root, action)
+    problems += [
+        f".github/actions/{a}/action.yml is called by no workflow" for a in sorted(present - called)
+    ]
     return problems
 
 

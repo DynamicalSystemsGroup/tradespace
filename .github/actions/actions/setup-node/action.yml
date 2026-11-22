@@ -1,0 +1,15 @@
+# The pin of actions/setup-node, outside the governed workflows (GOVERNANCE.md, "The secondary rules").
+# One step and nothing else: scripts/release_checks.py pins holds this file to that shape.
+name: actions/setup-node
+description: actions/setup-node at its pinned commit, the inputs passed through.
+inputs:
+  node-version:
+    description: The Node.js version.
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: action
+      uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+      with:
+        node-version: ${{ inputs.node-version }}

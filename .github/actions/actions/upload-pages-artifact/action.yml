@@ -1,0 +1,15 @@
+# The pin of actions/upload-pages-artifact, outside the governed workflows (GOVERNANCE.md, "The secondary rules").
+# One step and nothing else: scripts/release_checks.py pins holds this file to that shape.
+name: actions/upload-pages-artifact
+description: actions/upload-pages-artifact at its pinned commit, the inputs passed through.
+inputs:
+  path:
+    description: The directory to upload as the Pages artefact.
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: action
+      uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4.0.0
+      with:
+        path: ${{ inputs.path }}
