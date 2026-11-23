@@ -462,3 +462,20 @@ the Agent's defaults). Eight actions are called through wrappers under `.github/
 stay pinned in the workflows (`actions/checkout`, `pypa/gh-action-pypi-publish`, `actions/deploy-pages`), each for a
 stated reason. The design decisions inside his choice of mechanism were the driver's, on his word for the evening,
 and are listed as the Agent's defaults of the amendment for his approval as one item.
+
+## The defaults of Amendments 5, 6 and 7 approved (2026-11-22)
+
+The driver's report of the evening listed the Agent's defaults of Amendments 5, 6 and 7 as one item for his approval.
+His reply, verbatim:
+
+> seems fine
+
+Put to him as: "Does "seems fine" approve the agent's defaults of WP82 Amendments 5, 6 and 7 as one item (among them:
+the wrappers under `.github/actions/` are not governed files, so a tampered wrapper is detected on dev by the `pins`
+check and refused only at the release)?" With the options "Yes, approved" and "No, a general remark", his answer,
+verbatim:
+
+> Yes, approved
+
+Still open, and his: the second point of `rororowyourboat`'s comment on pull request #16 (independent review of
+substantive changes into `dev`).
