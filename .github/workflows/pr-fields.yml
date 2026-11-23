@@ -1,10 +1,11 @@
 name: Pull request fields
 
-# VC-4. Trigger: a pull request opened, edited or pushed to. Same safety as pr-linked-issue.yml: the base
-# branch is checked out and the description is read as data.
+# VC-4. Trigger: a pull request opened, edited, pushed to or labelled (Dependabot applies the `dependencies`
+# label after the open, and the dependency row reads it). Same safety as pr-linked-issue.yml: the base branch
+# is checked out and the description is read as data.
 on:
   pull_request_target:
-    types: [opened, edited, synchronize]
+    types: [opened, edited, synchronize, labeled]
 
 permissions:
   contents: read
@@ -16,7 +17,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
-      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+      - uses: ./.github/actions/astral-sh/setup-uv
       - name: Check the description's sections
         run: uv run --no-project python scripts/admissibility.py pr-fields --event "$GITHUB_EVENT_PATH" --report "$RUNNER_TEMP/report.md"
       - name: Say what is missing

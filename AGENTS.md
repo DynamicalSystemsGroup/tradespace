@@ -37,8 +37,9 @@ These documents are authoritative; the routing below is a quick reference.
   buildable and passing; do not merge `main` into feature branches or force-push shared branches.
 - Run the checks required by the contribution guide and the issue; report skipped checks explicitly.
   Passing CI does not replace a named reviewer's validation of behavior and rendered output.
-- Read [.github/CODEOWNERS](.github/CODEOWNERS) for current authority. A software PR is merged by a
-  code owner other than its author; a paper PR by a paper approver other than its author.
+- Read [.github/CODEOWNERS](.github/CODEOWNERS) for current authority. A software PR into `dev` is
+  merged by a code owner, who may be its author; a release PR into `main` is approved by a code owner other than
+  its author; a paper PR is merged by a paper approver other than its author.
 
 ## Releases and governance
 

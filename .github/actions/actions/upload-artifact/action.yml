@@ -1,0 +1,23 @@
+# The pin of actions/upload-artifact, outside the governed workflows (GOVERNANCE.md, "The secondary rules").
+# One step and nothing else: scripts/release_checks.py pins holds this file to that shape.
+name: actions/upload-artifact
+description: actions/upload-artifact at its pinned commit, the inputs passed through.
+inputs:
+  name:
+    description: The artifact's name.
+    required: true
+  path:
+    description: The files to upload.
+    required: true
+  if-no-files-found:
+    description: warn, error or ignore.
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: action
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+        if-no-files-found: ${{ inputs.if-no-files-found }}

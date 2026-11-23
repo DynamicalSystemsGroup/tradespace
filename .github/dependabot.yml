@@ -1,10 +1,41 @@
+# Dependency updates arrive as pull requests into dev (the candidates' branch; a pull request into main is
+# judged as a release and fails its admissibility), labelled `dependencies`, Dependabot's default label named
+# here so the pull request checks can read it. Minor and patch bumps arrive as one weekly pull request per
+# ecosystem; a major bump comes on its own. The route is the machine row for a dependency update in
+# .github/PR_ADMISSIBILITY.md and the steps are "Dependency updates" in docs/code-owners.md;
+# tests/test_admissibility.py holds this file to the target, the label and the groups.
+# The action pins live in two places: the wrappers under .github/actions/ (one directory each, since
+# Dependabot reads a composite action only in a directory named to it) and, for the three actions
+# that cannot be wrapped, the workflows (`/`). tests/test_release_checks.py holds the list to the
+# wrappers present.
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: /
+    directories:
+      - /
+      - /.github/actions/actions/cache
+      - /.github/actions/actions/cache/restore
+      - /.github/actions/actions/cache/save
+      - /.github/actions/actions/download-artifact
+      - /.github/actions/actions/setup-node
+      - /.github/actions/actions/upload-artifact
+      - /.github/actions/actions/upload-pages-artifact
+      - /.github/actions/astral-sh/setup-uv
     schedule:
       interval: weekly
+    target-branch: dev
+    labels: ["dependencies"]
+    groups:
+      actions-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: uv
     directory: /
     schedule:
       interval: weekly
+    target-branch: dev
+    labels: ["dependencies"]
+    groups:
+      python-minor-and-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
